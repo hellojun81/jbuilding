@@ -1,0 +1,9 @@
+{
+    "rules": {
+        "no-useless-escape": "off"
+    },
+    "parserOptions": {
+        "ecmaVersion": "latest",
+        "sourceType": "module"
+    }
+}

@@ -1,6 +1,7 @@
 import mysql from 'mysql2';
 import jsonfile from 'jsonfile';
 import path from 'path';
+import fs from 'fs';
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 const json = jsonfile.readFileSync(__dirname+'/database.json');
 
@@ -13,6 +14,8 @@ const connection = mysql.createConnection({
     database: json.mysql.database
 });
 
+// console.log({connection:connection.host ,__dirname:__dirname})
+
 // CREATE 함수
 function createData(table, data, callback) {
     const fields = Object.keys(data).join(',');
@@ -21,7 +24,7 @@ function createData(table, data, callback) {
     const sql = `INSERT INTO ${table} (${fields}) VALUES (${placeholders})`;
     connection.query(sql, values, (error, results, fields) => {
         if (error) throw error;
-        callback(results.insertId);
+        callback(results.affectedRows);
     });
 }
 
@@ -31,7 +34,17 @@ function readData(table, whereClause, callback) {
     if (whereClause) sql += ` WHERE ${whereClause}`;
     connection.query(sql, (error, results, fields) => {
         if (error) throw error;
-        callback(results);
+        let newJsonObj = {};
+        let obj=[]
+        for (let i = 0; i < results.length; i++) {
+            let keys = Object.keys(results[i]);
+            newJsonObj={}
+            keys.map((key) => {
+                newJsonObj[key] = ''+results[i][key]
+            });
+            obj.push(newJsonObj)
+        }
+        callback(obj);
     });
 }
 
