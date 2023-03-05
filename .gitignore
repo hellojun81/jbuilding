@@ -5,3 +5,10 @@
 **database.json
 
 .DS_STORE
+
+*.dll
+*.exe
+*.o
+*.so
+*.com
+*.class
