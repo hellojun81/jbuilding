@@ -5,6 +5,7 @@ import { Server } from 'socket.io';
 import http from 'http';
 import sql from './lib/CRUD.js';
 
+
 const httpServer = http.createServer(app);
 export const io = new Server(httpServer, {
     cors: {
@@ -17,12 +18,24 @@ app.use(cors({
     credentials: true, // 크로스 도메인 허용
     methods: ['POST', 'PUT', 'GET', 'OPTIONS', 'HEAD'],
 }));
-
 app.get('/', (req, res) => {
     res.header("Access-Control-Allow-Credentials", 'true')
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE'); // 모든 HTTP 메서드 허용
     res.header('Content-Type', "application/json")
     res.json('welcome')
+})
+
+
+app.post('/gy/:name', async function (req, res) {
+    const { name } = req.params
+})
+
+
+app.get('/jbd/:name', async function (req, res) {
+    const { name } = req.params
+    if (name == 'searchRenter') {
+        console.log('searchRenter')
+    }
 })
 
 

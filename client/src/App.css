@@ -1,7 +1,18 @@
+.datePickerClass{width:100%;margin: 0 auto!important;padding:0px;}
+.css-9ddj71-MuiInputBase-root-MuiOutlinedInput-root{height:40px;}
+.MainTitle{font-size: 16px;text-align: left;}
+.dtpicker .MuiInputBase-root{height:40px}
+
+.css-zow5z4-MuiGrid-root{margin: 0!important;}
 .App {
   text-align: center;
+  width:100%;
+  max-width: 600px;
+  background-color:#eeeeee;
+  margin: 0 auto;
 }
-
+a{color:black}
+.MuiOutlinedInput-notchedOutline {border-width:1px!important}
 .App-logo {
   height: 40vmin;
   pointer-events: none;
