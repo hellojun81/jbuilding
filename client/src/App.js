@@ -1,22 +1,17 @@
 import './App.css';
-import Dtpicker from './components/Dtpicker.js'
-import LinearProgress from './components/LinearProgress.js'
 import Mainbody from './components/MainBody.js'
+import LinearProgress from './components/LinearProgress.js'
 import React, { useRef, useEffect, useState } from 'react';
 import CssBaseline from '@mui/material/CssBaseline';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import Payment from './components/Payment.js'
-import RentBill from './components/RentBill.js'
 import Grid from '@mui/material/Grid';
-import RentEr from './components/Renter.js'
+import InfoPopup from './components/infoPopup.js'
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-import Slide from '@mui/material/Slide';
 import SpeedDial from '@mui/material/SpeedDial';
 import SpeedDialIcon from '@mui/material/SpeedDialIcon';
 import SpeedDialAction from '@mui/material/SpeedDialAction';
@@ -25,7 +20,11 @@ import ArticleIcon from '@mui/icons-material/Article';
 import DownloadIcon from '@mui/icons-material/Download';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
-const apiUrl = process.env.REACT_APP_API_URL;
+import store from './components/store';
+import { Provider, useDispatch, useSelector } from 'react-redux';
+// import { setCurrentName } from './store';
+
+
 const actions = [
   { icon: <DownloadIcon />, name: '엑셀다운로드2', operation: 'excelDown' },
   { icon: <ArticleIcon />, name: '청구서생성', operation: 'RentBill' },
@@ -33,10 +32,6 @@ const actions = [
   { icon: <CheckIcon />, name: '수납하기', operation: 'Payment' },
 ];
 
-
-const Transition = React.forwardRef(function Transition(props, ref) {
-  return <Slide direction="up" ref={ref} {...props} />;
-});
 
 
 function Header(props) {
@@ -53,38 +48,55 @@ function Header(props) {
 
 function App() {
   const [Mode, setMode] = useState('main');
-  const [DialogOpen, setDialogOpen] = React.useState(false);
-  const [popTitle, setpopTitle] = React.useState();
-  const [PopContent, setPopContent] = React.useState();
-  const mainTable = useRef(null);
-
-  const handleClickDialogOpen = () => {
-    setDialogOpen(true);
-  };
-
+  const [DialogOpen, setDialogOpen] = useState(false);
+  const [popTitle, setpopTitle] = useState();
+  const [PopContent, setPopContent] = useState();
   const handleClose = () => {
     setDialogOpen(false);
   };
 
+  useEffect(() => {
+    const subscribeCallback = () => {
+        const state = store.getState();
+        const renter = state.contentPop.value
+        const title = state.contentPop.title
+        console.log('App : state change')
+    };
+    store.subscribe(subscribeCallback);
+    return () => {
+        store.unsubscribe(subscribeCallback);
+    };
+}, []);
 
-
-  if (Mode === 'main') {
-
-  }
 
 
   const SpeedDialClick = (e) => {
-    console.log('SpeedDialClick', e)
+     console.log('SpeedDialClick')
     if (e === 'RentBill') {
-      setPopContent(<RentBill />)
+      setPopContent(<InfoPopup
+        textValue={[['임대료', '관리비', '부가세', '기타', '메모']]}
+        textValueName={[['rentBill', 'mngBill', 'vat', 'etc', 'memo']]}
+        title={'청구서생성'}
+        send={'App.js'}
+      />)
       setDialogOpen(true)
       setpopTitle('청구서생성')
     } else if (e === 'RentEr') {
-      setPopContent(<RentEr />)
+      setPopContent(<InfoPopup
+        textValue={[['건물명', '동호수', '입주자[상호]', '사업자번호', '담당자', '연락처', '이메일', '메모'], ['보증금', '임대료', '관리비', '기타']]}
+        textValueName={[['buildingName', 'add', 'name', 'liceness', 'manager', 'tel', 'email', 'memo'], ['depogit', 'rentbill', 'mngbill', 'etc']]}
+        title={'임차인추가'}
+        send={'App.js'}
+      />)
       setDialogOpen(true)
       setpopTitle('임차인추가')
     } else if (e === 'Payment') {
-      setPopContent(<Payment />)
+      setPopContent(<InfoPopup 
+        textValue={[['임대료', '관리비', '부가세', '기타', '메모']]}
+        textValueName={[['rentBill', 'mngBill', 'vat', 'etc', 'memo']]}
+        title={'수납하기'}
+        send={'App.js'}
+      />)
       setDialogOpen(true)
       setpopTitle('수납하기')
     } else if (e === 'excelDown') {
@@ -92,33 +104,19 @@ function App() {
     }
 
   };
-  const ReciveData = (event) => {
-    if (event) {
-      if ('Payment' in event) {
-        setPopContent(<Payment />)
-        setDialogOpen(true)
-        setpopTitle('수납하기')
-      }else  if ('MainTable' in event) {
-        setPopContent(<RentEr />)
-        setDialogOpen(true)
-        setpopTitle('계약정보')
-      }
-    }
-  }
+
 
   return (
-    <div className="App">
-      <Header title="제이빌딩 임대료관리" />
-      <Dtpicker />
-      <LinearProgress />
 
+    <div className="App" sx={{ maxWidth: '600px' }}>
+
+      {/* <ContentPop /> */}
+      <Header title="제이빌딩 임대료관리" />
       <Dialog
         open={DialogOpen}
-        TransitionComponent={Transition}
         keepMounted
         onClose={handleClose}
-        aria-describedby="alert-dialog-slide-description"
-      >
+        aria-describedby="alert-dialog-slide-description">
         <DialogTitle>
           <Grid container spacing={2} >
             <Grid item xs={10} ><DialogTitle id="scroll-dialog-title">{popTitle}</DialogTitle></Grid>
@@ -129,25 +127,17 @@ function App() {
             </Grid>
           </Grid>
         </DialogTitle>
-
-        <DialogContent>
-          <DialogContentText id="alert-dialog-slide-description">
-            {PopContent}
-          </DialogContentText>
-        </DialogContent>
+        {PopContent}
       </Dialog>
       <React.Fragment>
         <CssBaseline />
         <Container maxWidth="sm">
-          <Box sx={{ bgcolor: '#fff', height: '100%', borderRadius: '16px', marginTop: '30px', boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)' }}>
-            <Mainbody ref={mainTable} sendData={(value) => ReciveData(value)} >
-            </Mainbody>
-          </Box>
+          <Mainbody />
         </Container>
       </React.Fragment>
       <Box sx={{
         height: 320, transform: 'translateZ(0px)', flexGrow: 1,
-        position: 'fixed',
+        // position: 'fixed',
         bottom: '10px',
         right: '10px',
       }}>
@@ -157,7 +147,7 @@ function App() {
           ariaLabel="SpeedDial example"
           sx={{ position: 'absolute', bottom: 16, right: 16 }}
           icon={<SpeedDialIcon openIcon={<CloseIcon />} />}
-          onClick={SpeedDialClick}
+          // onClick={SpeedDialClick}
         >
           {actions.map((action) => (
             <SpeedDialAction
@@ -165,13 +155,14 @@ function App() {
               icon={action.icon}
               tooltipTitle={action.name}
               onClick={(e) => {
-                console.log(action.operation)
+                // console.log(action.operation)
                 SpeedDialClick(action.operation)
               }}
             />
           ))}
         </SpeedDial>
       </Box>
+
     </div >
   );
 }

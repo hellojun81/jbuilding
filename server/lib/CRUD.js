@@ -29,9 +29,10 @@ function createData(table, data, callback) {
 }
 
 // READ 함수
-function readData(table, whereClause, callback) {
-    let sql = `SELECT * FROM ${table}`;
+function readData(table, field,whereClause,sort, callback) {
+    let sql = `SELECT ${field} FROM ${table}`;
     if (whereClause) sql += ` WHERE ${whereClause}`;
+    if (sort) sql += `  ${sort}`;
     connection.query(sql, (error, results, fields) => {
         if (error) throw error;
         let newJsonObj = {};
